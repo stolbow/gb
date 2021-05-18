@@ -9,6 +9,24 @@ import sql_module as SQL
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+#решения заданий
+#Задание 1.1
+def ex1_1(a):
+    answer = a ** 2
+    return answer
+#Задание 2
+def ex2(summ_sec):
+    summ_min = summ_sec // 60
+    min = summ_min % 60
+    if len(str(min)) == 1:
+        min = f"0{min}"
+    sec = summ_sec % 60
+    if len(str(sec)) == 1:
+        sec = f"0{sec}"
+    hours = summ_min // 60
+    answer = f"{ hours }:{ min }:{ sec }"
+    return answer
+
 
 #тексты
 hello_message = "Я отвечу на все твои вопросы\nНо сначала, отправь мне свой номер телефона\nДля этого нажми на кнопку внизу"
@@ -22,12 +40,16 @@ ex6_text = "6. Спортсмен занимается ежедневными п
 
 #кнопки
 main_menu = ["Задание 1", "Задание 2", "Задание 3", "Задание 4", "Задание 5", "Задание 6"]
-ex1_menu = ["Сумма чисел", "Поприветсовать по имени", cancel]
+ex1_menu = ["a^2", "Hello, name!", cancel]
 ex2_menu = [cancel]
 ex3_menu = ["", cancel]
 ex4_menu = ["", cancel]
 ex5_menu = ["", cancel]
 ex6_menu = ["", cancel]
+
+#функции
+def change_stage(new_stage, user):
+    SQL.UPDATE("users", update_param1="stage", update_value1=new_stage, where_param1="telegram_id", where_value1=user["telegram_id"])
 
 #Отправка номера
 def make_keyboard_for_registration():
@@ -83,34 +105,67 @@ async def echo(message: types.Message):
         if user is not None:
             #Главное меню
             if message.text.lower() == str.lower(cancel):
+                change_stage(0, user)
                 await Send_message(message, "Вы в меню", keyboard=make_keyboard_Nbutton(main_menu, one_time_keyboard = False))
             #Задание 1
             elif message.text.lower() == str.lower(main_menu[0]):
+                change_stage(1, user)
                 #Текст задания + вывод меню
                 await Send_message(message, ex1_text, keyboard=make_keyboard_Nbutton(ex1_menu, one_time_keyboard = False))
+            #Задание 1.1 - a^2
+            elif message.text.lower() == str.lower(ex1_menu[0]):
+                change_stage(1.1, user)
+                await Send_message(message, "Введи число a", keyboard=make_keyboard_Nbutton(ex1_menu, one_time_keyboard=False))
+
+            #Задание 1.2 - Hello, name!
+            elif message.text.lower() == str.lower(ex1_menu[1]):
+                change_stage(1.2, user)
+                name = message.text
+                SQL.UPDATE("users", update_param1="name", update_value1=name, where_param1="telegram_id", where_value1=user["telegram_id"])
+                await Send_message(message, "Как тебя зовут?", keyboard=make_keyboard_Nbutton([cancel], one_time_keyboard=False))
             #Задание 2
             elif message.text.lower() == str.lower(main_menu[1]):
+                change_stage(2, user)
                 # Текст задания + вывод меню
-                await Send_message(message, ex2_text, keyboard=make_keyboard_Nbutton(ex2_menu, one_time_keyboard = False))
+                await Send_message(message, f"{ex2_text}\nВведи число n", keyboard=make_keyboard_Nbutton(ex2_menu, one_time_keyboard = False))
             # Задание 3
             elif message.text.lower() == str.lower(main_menu[2]):
+                change_stage(3, user)
                 # Текст задания + вывод меню
                 await Send_message(message, ex3_text, keyboard=make_keyboard_Nbutton(ex3_menu, one_time_keyboard = False))
             # Задание 4
             elif message.text.lower() == str.lower(main_menu[3]):
+                change_stage(4, user)
                 # Текст задания + вывод меню
                 await Send_message(message, ex4_text, keyboard=make_keyboard_Nbutton(ex4_menu, one_time_keyboard = False))
             # Задание 5
             elif message.text.lower() == str.lower(main_menu[4]):
+                change_stage(5, user)
                 # Текст задания + вывод меню
                 await Send_message(message, ex5_text, keyboard=make_keyboard_Nbutton(ex5_menu, one_time_keyboard = False))
             # Задание 6
             elif message.text.lower() == str.lower(main_menu[5]):
+                change_stage(6, user)
                 # Текст задания + вывод меню
                 await Send_message(message, ex6_text, keyboard=make_keyboard_Nbutton(ex6_menu, one_time_keyboard = False))
+            #optional
+            elif user["stage"] == 2:
+                change_stage(0, user)
+                n = int(message.text)
+                await Send_message(message, f"Ответ: {ex2(n)}", keyboard=make_keyboard_Nbutton(ex2_menu, one_time_keyboard = False))
+            elif user["stage"] == 1.1:
+                change_stage(0, user)
+                n = int(message.text)
+                await Send_message(message, f"a^2 = {ex1_1(n)}", keyboard=make_keyboard_Nbutton(ex2_menu, one_time_keyboard = False))
+            elif user["stage"] == 1.2:
+                change_stage(0, user)
+                await Send_message(message, f"Привет, {message.text}!", keyboard=make_keyboard_Nbutton(ex2_menu, one_time_keyboard = False))
         else:
             # Текст приветсвия
             await message.answer(hello_message, reply_markup=make_keyboard_for_registration())
+
+
+
 
     except Exception as e:
         print(e)
