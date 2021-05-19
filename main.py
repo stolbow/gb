@@ -214,7 +214,7 @@ async def echo(message: types.Message):
                 change_stage(0, user)
                 await Send_message(message, "Я не понял тебя, попробуй выбрать подходящий пункт меню", keyboard=make_keyboard_Nbutton(main_menu, one_time_keyboard = False))
         else:
-            # Текст приветсвия
+            # Приветствие
             await message.answer(hello_message, reply_markup=make_keyboard_for_registration())
 
 
