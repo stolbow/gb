@@ -6,7 +6,6 @@ from config import TOKEN #берем токен, который хранитьс
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 import sql_module as SQL
 
-
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 #решения заданий
@@ -63,7 +62,6 @@ def ex6(info):
         result*=1.1
         answer+=1
     return answer
-
 
 #тексты
 hello_message = "Я отвечу на все твои вопросы\nНо сначала, отправь мне свой номер телефона\nДля этого нажми на кнопку внизу"
